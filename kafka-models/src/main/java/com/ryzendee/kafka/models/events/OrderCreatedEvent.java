@@ -1,4 +1,4 @@
-package com.ryzendee.kafka.models;
+package com.ryzendee.kafka.models.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
