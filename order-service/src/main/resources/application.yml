@@ -45,3 +45,6 @@ topics:
   order:
     events:
       name: order-events
+  product:
+    commands:
+      name: product-commands

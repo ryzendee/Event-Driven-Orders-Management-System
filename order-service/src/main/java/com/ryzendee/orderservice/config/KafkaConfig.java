@@ -26,4 +26,12 @@ public class KafkaConfig {
                 .replicas(TOPIC_REPLICATION_FACTOR)
                 .build();
     }
+
+    @Bean
+    public NewTopic productCommandsTopic(@Value("${topics.product.commands.name}") String topic) {
+        return TopicBuilder.name(topic)
+                .partitions(TOPIC_PARTITIONS)
+                .replicas(TOPIC_REPLICATION_FACTOR)
+                .build();
+    }
 }
