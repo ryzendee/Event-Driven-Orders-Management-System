@@ -20,7 +20,8 @@ public class OrderSaga {
     private final OrderCreatedEventToReserveProductCommand orderCreatedEventToReserveProductCommand;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public OrderSaga(@Value("${topics.product.commands.name}") String productCommandsTopic, OrderCreatedEventToReserveProductCommand orderCreatedEventToReserveProductCommand,
+    public OrderSaga(@Value("${topics.product.commands.name}") String productCommandsTopic,
+                     OrderCreatedEventToReserveProductCommand orderCreatedEventToReserveProductCommand,
                      KafkaTemplate<String, Object> kafkaTemplate) {
         this.productCommandsTopic = productCommandsTopic;
         this.orderCreatedEventToReserveProductCommand = orderCreatedEventToReserveProductCommand;

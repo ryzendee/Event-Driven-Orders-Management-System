@@ -30,7 +30,8 @@ public class OrderServiceImpl implements OrderService {
     public OrderServiceImpl(@Value("${topics.order.events.name}") String orderEventsTopic,
                             OrderRepository orderRepository,
                             CreateOrderRequestToEntityMapper createOrderRequestToEntityMapper,
-                            OrderEntityToResponseMapper orderEntityToResponseMapper, OrderEntityToCreatedEventMapper orderEntityToCreatedEventMapper,
+                            OrderEntityToResponseMapper orderEntityToResponseMapper,
+                            OrderEntityToCreatedEventMapper orderEntityToCreatedEventMapper,
                             KafkaTemplate<String, Object> kafkaTemplate) {
         this.orderEventsTopic = orderEventsTopic;
         this.orderRepository = orderRepository;
