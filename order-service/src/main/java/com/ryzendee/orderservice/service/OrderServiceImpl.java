@@ -46,6 +46,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse createOrder(CreateOrderRequest request) {
         OrderEntity createdEntity = createEntity(request);
         orderRepository.save(createdEntity);
+        mapToEventAndSendToKafka(createdEntity);
 
         return orderEntityToResponseMapper.map(createdEntity);
     }
