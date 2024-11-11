@@ -1,6 +1,6 @@
 package com.ryzendee.orderservice.service;
 
-import com.ryzendee.kafka.models.events.OrderCreatedEvent;
+import com.ryzendee.kafka.models.events.order.OrderCreatedEvent;
 import com.ryzendee.orderservice.dto.request.CreateOrderRequest;
 import com.ryzendee.orderservice.dto.response.OrderResponse;
 import com.ryzendee.orderservice.entity.OrderEntity;

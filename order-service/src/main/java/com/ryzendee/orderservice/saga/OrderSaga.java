@@ -1,7 +1,7 @@
 package com.ryzendee.orderservice.saga;
 
 import com.ryzendee.kafka.models.commands.ReserveProductCommand;
-import com.ryzendee.kafka.models.events.OrderCreatedEvent;
+import com.ryzendee.kafka.models.events.order.OrderCreatedEvent;
 import com.ryzendee.orderservice.mapper.OrderCreatedEventToReserveProductCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
