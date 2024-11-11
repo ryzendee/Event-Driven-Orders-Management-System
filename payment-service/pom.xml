@@ -29,6 +29,7 @@
     <properties>
         <java.version>17</java.version>
         <kafka-models.version>0.0.1-SNAPSHOT</kafka-models.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
     </properties>
     <dependencies>
         <dependency>
@@ -72,6 +73,16 @@
             <groupId>com.ryzendee</groupId>
             <artifactId>kafka-models</artifactId>
             <version>${kafka-models.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${mapstruct.version}</version>
         </dependency>
     </dependencies>
 
