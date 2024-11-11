@@ -42,7 +42,7 @@ spring:
               packages: com.ryzend.kafka.*
 
 topics:
-  product:
+  payment:
     events:
       name: payment-events
     commands:
