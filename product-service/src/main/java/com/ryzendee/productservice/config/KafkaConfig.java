@@ -20,7 +20,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public NewTopic orderEventsTopic(@Value("${topics.product.events.name}") String topic) {
+    public NewTopic productEventsTopic(@Value("${topics.product.events.name}") String topic) {
         return TopicBuilder.name(topic)
                 .partitions(TOPIC_PARTITIONS)
                 .replicas(TOPIC_REPLICATION_FACTOR)
