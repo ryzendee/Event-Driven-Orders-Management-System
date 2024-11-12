@@ -45,6 +45,17 @@ topics:
   order:
     events:
       name: order-events
+    commands: order-commands
   product:
     commands:
       name: product-commands
+  shipment:
+    events:
+      name: shipment-events
+    commands:
+      name: shipment-commands
+  payment:
+    events:
+      name: payment-events
+    commands:
+      name: payment-commands

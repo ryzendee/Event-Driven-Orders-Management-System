@@ -20,7 +20,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public NewTopic orderEventsTopic(@Value("${topics.order.events.name}") String topic) {
+    public NewTopic orderCommandsTopic(@Value("${topics.order.commands.name}") String topic) {
         return TopicBuilder.name(topic)
                 .partitions(TOPIC_PARTITIONS)
                 .replicas(TOPIC_REPLICATION_FACTOR)
@@ -29,6 +29,22 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic productCommandsTopic(@Value("${topics.product.commands.name}") String topic) {
+        return TopicBuilder.name(topic)
+                .partitions(TOPIC_PARTITIONS)
+                .replicas(TOPIC_REPLICATION_FACTOR)
+                .build();
+    }
+
+    @Bean
+    public NewTopic paymentCommandsTopic(@Value("${topics.payment.commands.name}") String topic) {
+        return TopicBuilder.name(topic)
+                .partitions(TOPIC_PARTITIONS)
+                .replicas(TOPIC_REPLICATION_FACTOR)
+                .build();
+    }
+
+    @Bean
+    public NewTopic shipmentCommandsTopic(@Value("${topics.shipment.commands.name}") String topic) {
         return TopicBuilder.name(topic)
                 .partitions(TOPIC_PARTITIONS)
                 .replicas(TOPIC_REPLICATION_FACTOR)
