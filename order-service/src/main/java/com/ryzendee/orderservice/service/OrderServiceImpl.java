@@ -6,8 +6,10 @@ import com.ryzendee.orderservice.dto.response.OrderResponse;
 import com.ryzendee.orderservice.entity.OrderEntity;
 import com.ryzendee.orderservice.enums.OrderStatus;
 import com.ryzendee.orderservice.mapper.CreateOrderRequestToEntityMapper;
+import com.ryzendee.orderservice.mapper.EventMapper;
 import com.ryzendee.orderservice.mapper.OrderEntityToCreatedEventMapper;
 import com.ryzendee.orderservice.mapper.OrderEntityToResponseMapper;
+import com.ryzendee.orderservice.mapper.OrderMapper;
 import com.ryzendee.orderservice.repository.OrderRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,23 +23,20 @@ public class OrderServiceImpl implements OrderService {
 
     private final String orderEventsTopic;
     private final OrderRepository orderRepository;
-    private final CreateOrderRequestToEntityMapper createOrderRequestToEntityMapper;
-    private final OrderEntityToResponseMapper orderEntityToResponseMapper;
-    private final OrderEntityToCreatedEventMapper orderEntityToCreatedEventMapper;
+    private final OrderMapper orderMapper;
+    private final EventMapper eventMapper;
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public OrderServiceImpl(@Value("${topics.order.events.name}") String orderEventsTopic,
                             OrderRepository orderRepository,
-                            CreateOrderRequestToEntityMapper createOrderRequestToEntityMapper,
-                            OrderEntityToResponseMapper orderEntityToResponseMapper,
-                            OrderEntityToCreatedEventMapper orderEntityToCreatedEventMapper,
+                            OrderMapper orderMapper,
+                            EventMapper eventMapper,
                             KafkaTemplate<String, Object> kafkaTemplate) {
         this.orderEventsTopic = orderEventsTopic;
         this.orderRepository = orderRepository;
-        this.createOrderRequestToEntityMapper = createOrderRequestToEntityMapper;
-        this.orderEntityToResponseMapper = orderEntityToResponseMapper;
-        this.orderEntityToCreatedEventMapper = orderEntityToCreatedEventMapper;
+        this.orderMapper = orderMapper;
+        this.eventMapper = eventMapper;
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -48,17 +47,17 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(createdEntity);
         mapToEventAndSendToKafka(createdEntity);
 
-        return orderEntityToResponseMapper.map(createdEntity);
+        return orderMapper.map(createdEntity);
     }
 
     private OrderEntity createEntity(CreateOrderRequest request) {
-        OrderEntity mappedEntity = createOrderRequestToEntityMapper.map(request);
+        OrderEntity mappedEntity = orderMapper.map(request);
         mappedEntity.setOrderStatus(OrderStatus.CREATED);
 
         return mappedEntity;
     }
     private void mapToEventAndSendToKafka(OrderEntity entity) {
-        OrderCreatedEvent createdEvent = orderEntityToCreatedEventMapper.map(entity);
+        OrderCreatedEvent createdEvent = eventMapper.map(entity);
         kafkaTemplate.send(orderEventsTopic, createdEvent);
     }
 }
