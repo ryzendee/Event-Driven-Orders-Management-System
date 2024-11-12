@@ -2,6 +2,7 @@ package com.ryzendee.orderservice.saga;
 
 import com.ryzendee.kafka.models.commands.ReserveProductCommand;
 import com.ryzendee.kafka.models.events.order.OrderCreatedEvent;
+import com.ryzendee.orderservice.config.KafkaCommandTopicProperties;
 import com.ryzendee.orderservice.mapper.OrderCreatedEventToReserveProductCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,19 +12,22 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 
 @KafkaListener(topics = {
-        "${topics.order.event.name}"
+        "${topics.order.events.name}",
+        "${topics.product.events.name}",
+        "${topics.payment.events.name}",
+        "${topics.shipment.events.name}"
 })
 @Slf4j
 public class OrderSaga {
 
-    private final String productCommandsTopic;
+    private final KafkaCommandTopicProperties topicProperties;
     private final OrderCreatedEventToReserveProductCommand orderCreatedEventToReserveProductCommand;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public OrderSaga(@Value("${topics.product.commands.name}") String productCommandsTopic,
+    public OrderSaga(KafkaCommandTopicProperties kafkaCommandTopicProperties,
                      OrderCreatedEventToReserveProductCommand orderCreatedEventToReserveProductCommand,
                      KafkaTemplate<String, Object> kafkaTemplate) {
-        this.productCommandsTopic = productCommandsTopic;
+        this.topicProperties = kafkaCommandTopicProperties;
         this.orderCreatedEventToReserveProductCommand = orderCreatedEventToReserveProductCommand;
         this.kafkaTemplate = kafkaTemplate;
     }
@@ -33,6 +37,6 @@ public class OrderSaga {
         log.info("Received order created event: {}", orderCreatedEvent);
         ReserveProductCommand reserveProductCommand = orderCreatedEventToReserveProductCommand.map(orderCreatedEvent);
 
-        kafkaTemplate.send(productCommandsTopic, reserveProductCommand);
+        kafkaTemplate.send(topicProperties.getOrderCommandsTopic(), reserveProductCommand);
     }
 }
