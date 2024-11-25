@@ -10,7 +10,11 @@ import com.ryzendee.kafka.models.events.payment.PaymentProcessedEvent;
 import com.ryzendee.kafka.models.events.product.ProductReservedEvent;
 import com.ryzendee.kafka.models.events.shipment.ShipmentCreatedEvent;
 import com.ryzendee.orderservice.config.KafkaCommandTopicProperties;
+import com.ryzendee.orderservice.enums.OrderStatus;
 import com.ryzendee.orderservice.mapper.CommandMapper;
+import com.ryzendee.orderservice.service.OrderHistoryService;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -24,23 +28,19 @@ import org.springframework.messaging.handler.annotation.Payload;
         "${topics.shipment.events.name}"
 })
 @Slf4j
+@RequiredArgsConstructor
 public class OrderSaga {
 
     private final KafkaCommandTopicProperties topicProperties;
     private final CommandMapper commandMapper;
     private final KafkaTemplate<String, Object> kafkaTemplate;
-
-    public OrderSaga(KafkaCommandTopicProperties kafkaCommandTopicProperties,
-                     CommandMapper commandMapper,
-                     KafkaTemplate<String, Object> kafkaTemplate) {
-        this.topicProperties = kafkaCommandTopicProperties;
-        this.commandMapper = commandMapper;
-        this.kafkaTemplate = kafkaTemplate;
-    }
+    private final OrderHistoryService orderHistoryService;
 
     @KafkaHandler
     public void handleOrderCreatedEvent(@Payload OrderCreatedEvent event) {
         log.info("Received order created event: {}", event);
+        orderHistoryService.addOrder(event.getOrderId(), OrderStatus.CREATED);
+
         ReserveProductCommand command = commandMapper.map(event);
         kafkaTemplate.send(topicProperties.getOrderCommandsTopic(), command);
     }
