@@ -33,6 +33,8 @@ public class ShipmentCommandHandler {
         this.kafkaTemplate = kafkaTemplate;
     }
 
+
+    @KafkaHandler
     public void handleCreateShipmentCommand(@Payload CreateShipmentCommand command) {
         ShipmentResponse response = createShipment(command);
         sendShipmentCreatedEvent(response);
