@@ -1,4 +1,4 @@
-package com.ryzendee.kafka.models.commands;
+package com.ryzendee.kafka.models.commands.payment;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

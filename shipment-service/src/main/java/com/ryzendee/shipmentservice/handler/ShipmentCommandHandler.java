@@ -1,12 +1,11 @@
 package com.ryzendee.shipmentservice.handler;
 
-import com.ryzendee.kafka.models.commands.CreateShipmentCommand;
+import com.ryzendee.kafka.models.commands.shipment.CreateShipmentCommand;
 import com.ryzendee.kafka.models.events.shipment.ShipmentCreatedEvent;
 import com.ryzendee.shipmentservice.dto.request.CreateShipmentRequest;
 import com.ryzendee.shipmentservice.dto.response.ShipmentResponse;
 import com.ryzendee.shipmentservice.mapper.ShipmentMapper;
 import com.ryzendee.shipmentservice.service.ShipmentService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;

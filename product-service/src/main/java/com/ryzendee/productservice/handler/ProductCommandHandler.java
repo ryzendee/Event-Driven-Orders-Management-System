@@ -1,12 +1,11 @@
 package com.ryzendee.productservice.handler;
 
-import com.ryzendee.kafka.models.commands.ReserveProductCommand;
+import com.ryzendee.kafka.models.commands.product.ReserveProductCommand;
 import com.ryzendee.kafka.models.events.product.ProductReservationFailedEvent;
 import com.ryzendee.kafka.models.events.product.ProductReservedEvent;
 import com.ryzendee.productservice.dto.response.ProductResponse;
 import com.ryzendee.productservice.exception.ProductReservationException;
 import com.ryzendee.productservice.service.ProductService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaHandler;

@@ -1,19 +1,19 @@
 package com.ryzendee.orderservice.saga;
 
-import com.ryzendee.kafka.models.commands.ApproveOrderCommand;
-import com.ryzendee.kafka.models.commands.CreateShipmentCommand;
-import com.ryzendee.kafka.models.commands.ProcessPaymentCommand;
-import com.ryzendee.kafka.models.commands.ReserveProductCommand;
+import com.ryzendee.kafka.models.commands.order.ApproveOrderCommand;
+import com.ryzendee.kafka.models.commands.shipment.CreateShipmentCommand;
+import com.ryzendee.kafka.models.commands.payment.ProcessPaymentCommand;
+import com.ryzendee.kafka.models.commands.product.ReserveProductCommand;
 import com.ryzendee.kafka.models.events.order.OrderApprovedEvent;
 import com.ryzendee.kafka.models.events.order.OrderCreatedEvent;
 import com.ryzendee.kafka.models.events.payment.PaymentProcessedEvent;
+import com.ryzendee.kafka.models.events.product.ProductReservationFailedEvent;
 import com.ryzendee.kafka.models.events.product.ProductReservedEvent;
 import com.ryzendee.kafka.models.events.shipment.ShipmentCreatedEvent;
 import com.ryzendee.orderservice.config.KafkaCommandTopicProperties;
 import com.ryzendee.orderservice.enums.OrderStatus;
 import com.ryzendee.orderservice.mapper.CommandMapper;
 import com.ryzendee.orderservice.service.OrderHistoryService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -50,6 +50,11 @@ public class OrderSaga {
         log.info("Received product reserved event: {}", event);
         ProcessPaymentCommand command = commandMapper.map(event);
         kafkaTemplate.send(topicProperties.getPaymentCommandsTopic(), command);
+    }
+
+    @KafkaHandler
+    public void handleProductReservationFailedEvent(@Payload ProductReservationFailedEvent event) {
+        log.info("Received product reservation failed event: {}", event);
     }
 
     @KafkaHandler

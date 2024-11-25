@@ -1,6 +1,6 @@
 package com.ryzendee.paymentservice.handler;
 
-import com.ryzendee.kafka.models.commands.ProcessPaymentCommand;
+import com.ryzendee.kafka.models.commands.payment.ProcessPaymentCommand;
 import com.ryzendee.kafka.models.events.payment.PaymentProcessFailedEvent;
 import com.ryzendee.kafka.models.events.payment.PaymentProcessedEvent;
 import com.ryzendee.paymentservice.dto.request.PaymentRequest;
