@@ -1,11 +1,15 @@
 package com.ryzendee.orderservice.saga;
 
 import com.ryzendee.kafka.models.commands.order.ApproveOrderCommand;
+import com.ryzendee.kafka.models.commands.order.RejectOrderCommand;
+import com.ryzendee.kafka.models.commands.product.CancelProductReservationCommand;
+import com.ryzendee.kafka.models.commands.product.ProductReservationCancelledEvent;
 import com.ryzendee.kafka.models.commands.shipment.CreateShipmentCommand;
 import com.ryzendee.kafka.models.commands.payment.ProcessPaymentCommand;
 import com.ryzendee.kafka.models.commands.product.ReserveProductCommand;
 import com.ryzendee.kafka.models.events.order.OrderApprovedEvent;
 import com.ryzendee.kafka.models.events.order.OrderCreatedEvent;
+import com.ryzendee.kafka.models.events.payment.PaymentProcessFailedEvent;
 import com.ryzendee.kafka.models.events.payment.PaymentProcessedEvent;
 import com.ryzendee.kafka.models.events.product.ProductReservationFailedEvent;
 import com.ryzendee.kafka.models.events.product.ProductReservedEvent;
@@ -55,6 +59,8 @@ public class OrderSaga {
     @KafkaHandler
     public void handleProductReservationFailedEvent(@Payload ProductReservationFailedEvent event) {
         log.info("Received product reservation failed event: {}", event);
+        RejectOrderCommand command = commandMapper.map(event);
+        kafkaTemplate.send(topicProperties.getOrderCommandsTopic(), command);
     }
 
     @KafkaHandler
@@ -62,6 +68,20 @@ public class OrderSaga {
         log.info("Received payment processed event: {}", event);
         CreateShipmentCommand command = commandMapper.map(event);
         kafkaTemplate.send(topicProperties.getShipmentCommandsTopic(), command);
+    }
+
+    @KafkaHandler
+    public void handlePaymentProcessFailedEvent(@Payload PaymentProcessFailedEvent event) {
+        log.info("Received payment process failed event: {}", event);
+        CancelProductReservationCommand command = commandMapper.map(event);
+        kafkaTemplate.send(topicProperties.getProductCommandsTopic(), command);
+    }
+
+    @KafkaHandler
+    public void handleProductReservationCancelledEvent(@Payload ProductReservationCancelledEvent event) {
+        log.info("Received product reservation cancelled event: {}", event);
+        RejectOrderCommand command = commandMapper.map(event);
+        kafkaTemplate.send(topicProperties.getOrderCommandsTopic(), command);
     }
 
     @KafkaHandler
