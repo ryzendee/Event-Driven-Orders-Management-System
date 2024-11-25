@@ -4,11 +4,7 @@ import com.ryzendee.kafka.models.events.order.OrderCreatedEvent;
 import com.ryzendee.orderservice.dto.request.CreateOrderRequest;
 import com.ryzendee.orderservice.dto.response.OrderResponse;
 import com.ryzendee.orderservice.entity.OrderEntity;
-import com.ryzendee.orderservice.enums.OrderStatus;
-import com.ryzendee.orderservice.mapper.CreateOrderRequestToEntityMapper;
 import com.ryzendee.orderservice.mapper.EventMapper;
-import com.ryzendee.orderservice.mapper.OrderEntityToCreatedEventMapper;
-import com.ryzendee.orderservice.mapper.OrderEntityToResponseMapper;
 import com.ryzendee.orderservice.mapper.OrderMapper;
 import com.ryzendee.orderservice.repository.OrderRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -43,19 +39,13 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public OrderResponse createOrder(CreateOrderRequest request) {
-        OrderEntity createdEntity = createEntity(request);
+        OrderEntity createdEntity = orderMapper.map(request);
         orderRepository.save(createdEntity);
         mapToEventAndSendToKafka(createdEntity);
 
         return orderMapper.map(createdEntity);
     }
 
-    private OrderEntity createEntity(CreateOrderRequest request) {
-        OrderEntity mappedEntity = orderMapper.map(request);
-        mappedEntity.setOrderStatus(OrderStatus.CREATED);
-
-        return mappedEntity;
-    }
     private void mapToEventAndSendToKafka(OrderEntity entity) {
         OrderCreatedEvent createdEvent = eventMapper.map(entity);
         kafkaTemplate.send(orderEventsTopic, createdEvent);
