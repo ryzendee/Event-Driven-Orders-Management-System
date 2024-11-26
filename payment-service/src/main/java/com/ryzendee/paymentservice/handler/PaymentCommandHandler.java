@@ -5,6 +5,7 @@ import com.ryzendee.kafka.models.events.payment.PaymentProcessFailedEvent;
 import com.ryzendee.kafka.models.events.payment.PaymentProcessedEvent;
 import com.ryzendee.paymentservice.dto.request.PaymentRequest;
 import com.ryzendee.paymentservice.dto.response.PaymentResponse;
+import com.ryzendee.paymentservice.mapper.EventMapper;
 import com.ryzendee.paymentservice.mapper.PaymentMapper;
 import com.ryzendee.paymentservice.service.PaymentService;
 import lombok.extern.slf4j.Slf4j;
@@ -23,15 +24,18 @@ public class PaymentCommandHandler {
     private final String paymentEventsTopic;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final PaymentMapper paymentMapper;
+    private final EventMapper eventMapper;
     private final PaymentService paymentService;
 
     public PaymentCommandHandler(@Value("${topics.payment.events.name}") String paymentEventsTopic,
                                  KafkaTemplate<String, Object> kafkaTemplate,
                                  PaymentMapper paymentMapper,
+                                 EventMapper eventMapper,
                                  PaymentService paymentService) {
         this.paymentEventsTopic = paymentEventsTopic;
         this.kafkaTemplate = kafkaTemplate;
         this.paymentMapper = paymentMapper;
+        this.eventMapper = eventMapper;
         this.paymentService = paymentService;
     }
 
@@ -42,31 +46,13 @@ public class PaymentCommandHandler {
         PaymentRequest request = paymentMapper.map(command);
 
         try {
-            PaymentResponse response = paymentService.processPayment(request);
-            sendPaymentProcessedEvent(response);
+            paymentService.processPayment(request);
+            PaymentProcessedEvent event = eventMapper.mapToProcessedEvent(command);
+            kafkaTemplate.send(paymentEventsTopic, event);
         } catch (Exception ex) {
             log.error("Failed to process payment", ex);
-            sendPaymentProcessFailedEvent(command);
+            PaymentProcessFailedEvent event = eventMapper.mapToProcessFailedEvent(command);
+            kafkaTemplate.send(paymentEventsTopic, event);
         }
-    }
-
-    private void sendPaymentProcessedEvent(PaymentResponse paymentResponse) {
-        PaymentProcessedEvent event = new PaymentProcessedEvent(
-                paymentResponse.id(),
-                paymentResponse.orderId()
-        );
-
-        kafkaTemplate.send(paymentEventsTopic, event);
-    }
-
-    private void sendPaymentProcessFailedEvent(ProcessPaymentCommand command) {
-        PaymentProcessFailedEvent event = new PaymentProcessFailedEvent(
-                command.getOrderId(),
-                command.getProductId(),
-                command.getProductPrice(),
-                command.getProductQuantity()
-        );
-
-        kafkaTemplate.send(paymentEventsTopic, event);
     }
 }
