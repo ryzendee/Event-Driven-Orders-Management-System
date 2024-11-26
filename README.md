@@ -45,13 +45,13 @@ Order Service завершает процесс, генерируя событи
 ### Неуспешный сценарий (откат)
 
 #### Ошибка обработки платежа:
-Если на этапе обработки платежа возникает ошибка (например, отклонение платежа), **Payment Service** публикует событие `PaymentProcessedFailedEvent`.
+Если на этапе обработки платежа возникает ошибка (например, отклонение платежа), Payment Service публикует событие `PaymentProcessedFailedEvent`.
 
 #### Отмена резервирования товара:
-Сага перехватывает событие `PaymentProcessedFailedEvent` и отправляет команду `CancelProductReservationCommand` в **Product Service** для отмены ранее зарезервированных товаров. 
-Если отмена проходит успешно, **Product Service** генерирует событие `ProductReservationCancelledEvent`.
+Сага перехватывает событие `PaymentProcessedFailedEvent` и отправляет команду `CancelProductReservationCommand` в Product Service для отмены ранее зарезервированных товаров. 
+Если отмена проходит успешно, Product Service генерирует событие `ProductReservationCancelledEvent`.
 
 #### Отклонение заказа:
-Сага перехватывает событие `ProductReservationCancelledEvent` и отправляет команду `RejectOrderCommand` в **Order Service** для отклонения заказа.
-Когда **Order Service** получает команду `RejectOrderCommand`, он отклоняет заказ и завершает процесс отката, генерируя событие `OrderRejectedEvent`, уведомляющее о том, что заказ был отклонен.
+Сага перехватывает событие `ProductReservationCancelledEvent` и отправляет команду `RejectOrderCommand` в Order Service для отклонения заказа.
+Когда Order Service получает команду `RejectOrderCommand`, он отклоняет заказ и завершает процесс отката, генерируя событие `OrderRejectedEvent`, уведомляющее о том, что заказ был отклонен.
 
