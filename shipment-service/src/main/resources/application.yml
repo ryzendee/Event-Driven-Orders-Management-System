@@ -6,7 +6,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: postgres
-    url: jdbc:postgresql://localhost:5434/shipmentsdb
+    url: jdbc:postgresql://localhost:5435/shipmentsdb
 
   kafka:
     bootstrap-servers: localhost:9092,localhost:9094,localhost:9096
