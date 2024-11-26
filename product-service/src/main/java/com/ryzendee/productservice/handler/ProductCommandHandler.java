@@ -1,6 +1,7 @@
 package com.ryzendee.productservice.handler;
 
 import com.ryzendee.kafka.models.commands.product.CancelProductReservationCommand;
+import com.ryzendee.kafka.models.commands.product.ProductReservationCancelledEvent;
 import com.ryzendee.kafka.models.commands.product.ReserveProductCommand;
 import com.ryzendee.kafka.models.events.product.ProductReservationFailedEvent;
 import com.ryzendee.kafka.models.events.product.ProductReservedEvent;
@@ -50,4 +51,14 @@ public class ProductCommandHandler {
             kafkaTemplate.send(productEventsTopic, event);
         }
     }
+
+    @KafkaHandler
+    public void handleCancelProductReservationCommand(@Payload CancelProductReservationCommand command) {
+        log.info("Received cancel product reservation command: {}", command);
+        productService.cancelReservation(command.getProductId(), command.getQuantity());
+
+        ProductReservationCancelledEvent event = eventMapper.mapToReservationCancelledEvent(command);
+        kafkaTemplate.send(productEventsTopic, event);
+    }
+
 }
