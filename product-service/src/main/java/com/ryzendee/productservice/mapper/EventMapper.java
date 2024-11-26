@@ -1,7 +1,7 @@
 package com.ryzendee.productservice.mapper;
 
 import com.ryzendee.kafka.models.commands.product.CancelProductReservationCommand;
-import com.ryzendee.kafka.models.commands.product.ProductReservationCancelledEvent;
+import com.ryzendee.kafka.models.events.product.ProductReservationCancelledEvent;
 import com.ryzendee.kafka.models.commands.product.ReserveProductCommand;
 import com.ryzendee.kafka.models.events.product.ProductReservationFailedEvent;
 import com.ryzendee.kafka.models.events.product.ProductReservedEvent;

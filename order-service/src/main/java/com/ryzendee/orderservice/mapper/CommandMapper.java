@@ -3,7 +3,7 @@ package com.ryzendee.orderservice.mapper;
 import com.ryzendee.kafka.models.commands.order.ApproveOrderCommand;
 import com.ryzendee.kafka.models.commands.order.RejectOrderCommand;
 import com.ryzendee.kafka.models.commands.product.CancelProductReservationCommand;
-import com.ryzendee.kafka.models.commands.product.ProductReservationCancelledEvent;
+import com.ryzendee.kafka.models.events.product.ProductReservationCancelledEvent;
 import com.ryzendee.kafka.models.commands.shipment.CreateShipmentCommand;
 import com.ryzendee.kafka.models.commands.payment.ProcessPaymentCommand;
 import com.ryzendee.kafka.models.commands.product.ReserveProductCommand;

@@ -1,7 +1,7 @@
 package com.ryzendee.productservice.handler;
 
 import com.ryzendee.kafka.models.commands.product.CancelProductReservationCommand;
-import com.ryzendee.kafka.models.commands.product.ProductReservationCancelledEvent;
+import com.ryzendee.kafka.models.events.product.ProductReservationCancelledEvent;
 import com.ryzendee.kafka.models.commands.product.ReserveProductCommand;
 import com.ryzendee.kafka.models.events.product.ProductReservationFailedEvent;
 import com.ryzendee.kafka.models.events.product.ProductReservedEvent;
@@ -16,8 +16,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 @Component
 @KafkaListener(topics = "${topics.product.commands.name}")
