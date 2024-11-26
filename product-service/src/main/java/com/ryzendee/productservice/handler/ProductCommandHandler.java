@@ -1,10 +1,12 @@
 package com.ryzendee.productservice.handler;
 
+import com.ryzendee.kafka.models.commands.product.CancelProductReservationCommand;
 import com.ryzendee.kafka.models.commands.product.ReserveProductCommand;
 import com.ryzendee.kafka.models.events.product.ProductReservationFailedEvent;
 import com.ryzendee.kafka.models.events.product.ProductReservedEvent;
 import com.ryzendee.productservice.dto.response.ProductResponse;
 import com.ryzendee.productservice.exception.ProductReservationException;
+import com.ryzendee.productservice.mapper.EventMapper;
 import com.ryzendee.productservice.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,13 +26,15 @@ public class ProductCommandHandler {
     private final String productEventsTopic;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ProductService productService;
+    private final EventMapper eventMapper;
 
     public ProductCommandHandler(@Value("${topics.product.events.name}") String productEventsTopic,
                                  KafkaTemplate<String, Object> kafkaTemplate,
-                                 ProductService productService) {
+                                 ProductService productService, EventMapper eventMapper) {
         this.productEventsTopic = productEventsTopic;
         this.kafkaTemplate = kafkaTemplate;
         this.productService = productService;
+        this.eventMapper = eventMapper;
     }
 
     @KafkaHandler
@@ -38,31 +42,12 @@ public class ProductCommandHandler {
         log.info("Received reserve product command: {}", reserveProductCommand);
         try {
             ProductResponse reservedProduct = productService.reserveProduct(reserveProductCommand.getProductId(), reserveProductCommand.getQuantity());
-            sendProductReservedEvent(reserveProductCommand.getOrderId(), reservedProduct);
+            ProductReservedEvent event = eventMapper.mapToReservedEvent(reserveProductCommand);
+            kafkaTemplate.send(productEventsTopic, event);
         } catch (ProductReservationException ex) {
             log.error("Failed to reserve product", ex);
-            sendProductReservationFailedEvent(reserveProductCommand);
+            ProductReservationFailedEvent event = eventMapper.mapToReservationFailedEvent(reserveProductCommand);
+            kafkaTemplate.send(productEventsTopic, event);
         }
-    }
-
-    private void sendProductReservedEvent(UUID orderId, ProductResponse productResponse) {
-        ProductReservedEvent productReservedEvent = new ProductReservedEvent(
-                orderId,
-                productResponse.id(),
-                productResponse.price(),
-                productResponse.quantity()
-        );
-
-        kafkaTemplate.send(productEventsTopic, productReservedEvent);
-    }
-
-    private void sendProductReservationFailedEvent(ReserveProductCommand reserveProductCommand) {
-        ProductReservationFailedEvent reservationFailedEvent = new ProductReservationFailedEvent(
-                reserveProductCommand.getOrderId(),
-                reserveProductCommand.getProductId(),
-                reserveProductCommand.getQuantity()
-        );
-
-        kafkaTemplate.send(productEventsTopic, reservationFailedEvent);
     }
 }
