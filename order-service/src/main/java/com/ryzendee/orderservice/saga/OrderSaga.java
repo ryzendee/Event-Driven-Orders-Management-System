@@ -3,6 +3,7 @@ package com.ryzendee.orderservice.saga;
 import com.ryzendee.kafka.models.commands.order.ApproveOrderCommand;
 import com.ryzendee.kafka.models.commands.order.RejectOrderCommand;
 import com.ryzendee.kafka.models.commands.product.CancelProductReservationCommand;
+import com.ryzendee.kafka.models.events.order.OrderRejectedEvent;
 import com.ryzendee.kafka.models.events.product.ProductReservationCancelledEvent;
 import com.ryzendee.kafka.models.commands.shipment.CreateShipmentCommand;
 import com.ryzendee.kafka.models.commands.payment.ProcessPaymentCommand;
@@ -53,6 +54,15 @@ public class OrderSaga {
     @KafkaHandler
     public void handleOrderApprovedEvent(@Payload OrderApprovedEvent event) {
         log.info("Received order approved event: {}", event);
+        orderHistoryService.addOrder(event.getOrderId(), OrderStatus.APPROVED);
+        // End of saga (successfully scenario)
+    }
+
+    @KafkaHandler
+    public void handleOrderRejectedEvent(@Payload OrderRejectedEvent event) {
+        log.info("Received order rejected event: {}", event);
+        orderHistoryService.addOrder(event.getOrderId(), OrderStatus.REJECTED);
+        // End of saga (failed scenario)
     }
 
     //Product
