@@ -9,4 +9,5 @@ public interface OrderService {
 
     OrderResponse createOrder(CreateOrderRequest request);
     void approveOrder(UUID orderId);
+    void rejectOrder(UUID orderId);
 }

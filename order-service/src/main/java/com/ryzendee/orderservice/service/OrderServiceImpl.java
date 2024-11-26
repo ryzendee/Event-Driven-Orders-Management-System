@@ -1,6 +1,5 @@
 package com.ryzendee.orderservice.service;
 
-import com.ryzendee.kafka.models.events.order.OrderApprovedEvent;
 import com.ryzendee.kafka.models.events.order.OrderCreatedEvent;
 import com.ryzendee.orderservice.dto.request.CreateOrderRequest;
 import com.ryzendee.orderservice.dto.response.OrderResponse;
@@ -59,9 +58,13 @@ public class OrderServiceImpl implements OrderService {
         OrderEntity order = getOrderById(orderId);
         order.setOrderStatus(OrderStatus.APPROVED);
         orderRepository.save(order);
+    }
 
-        OrderApprovedEvent approvedEvent = eventMapper.mapToApprovedEvent(order);
-        kafkaTemplate.send(orderEventsTopic, approvedEvent);
+    @Override
+    public void rejectOrder(UUID orderId) {
+        OrderEntity order = getOrderById(orderId);
+        order.setOrderStatus(OrderStatus.REJECTED);
+        orderRepository.save(order);
     }
 
     private OrderEntity getOrderById(UUID id) {
