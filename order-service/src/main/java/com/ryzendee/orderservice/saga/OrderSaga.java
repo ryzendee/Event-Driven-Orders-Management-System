@@ -40,6 +40,7 @@ public class OrderSaga {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final OrderHistoryService orderHistoryService;
 
+    // Order
     @KafkaHandler
     public void handleOrderCreatedEvent(@Payload OrderCreatedEvent event) {
         log.info("Received order created event: {}", event);
@@ -50,12 +51,17 @@ public class OrderSaga {
     }
 
     @KafkaHandler
+    public void handleOrderApprovedEvent(@Payload OrderApprovedEvent event) {
+        log.info("Received order approved event: {}", event);
+    }
+
+    //Product
+    @KafkaHandler
     public void handleProductReservedEvent(@Payload ProductReservedEvent event) {
         log.info("Received product reserved event: {}", event);
         ProcessPaymentCommand command = commandMapper.map(event);
         kafkaTemplate.send(topicProperties.getPaymentCommandsTopic(), command);
     }
-
     @KafkaHandler
     public void handleProductReservationFailedEvent(@Payload ProductReservationFailedEvent event) {
         log.info("Received product reservation failed event: {}", event);
@@ -63,6 +69,14 @@ public class OrderSaga {
         kafkaTemplate.send(topicProperties.getOrderCommandsTopic(), command);
     }
 
+    @KafkaHandler
+    public void handleProductReservationCancelledEvent(@Payload ProductReservationCancelledEvent event) {
+        log.info("Received product reservation cancelled event: {}", event);
+        RejectOrderCommand command = commandMapper.map(event);
+        kafkaTemplate.send(topicProperties.getOrderCommandsTopic(), command);
+    }
+
+    //Payment
     @KafkaHandler
     public void handlePaymentProcessedEvent(@Payload PaymentProcessedEvent event) {
         log.info("Received payment processed event: {}", event);
@@ -77,22 +91,11 @@ public class OrderSaga {
         kafkaTemplate.send(topicProperties.getProductCommandsTopic(), command);
     }
 
-    @KafkaHandler
-    public void handleProductReservationCancelledEvent(@Payload ProductReservationCancelledEvent event) {
-        log.info("Received product reservation cancelled event: {}", event);
-        RejectOrderCommand command = commandMapper.map(event);
-        kafkaTemplate.send(topicProperties.getOrderCommandsTopic(), command);
-    }
-
+    //Shipment
     @KafkaHandler
     public void handleShipmentCreatedEvent(@Payload ShipmentCreatedEvent event) {
         log.info("Received shipment created event: {}", event);
         ApproveOrderCommand command = commandMapper.map(event);
         kafkaTemplate.send(topicProperties.getOrderCommandsTopic(), command);
-    }
-
-    @KafkaHandler
-    public void handleOrderApprovedEvent(@Payload OrderApprovedEvent event) {
-        log.info("Received order approved event: {}", event);
     }
 }
