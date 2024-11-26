@@ -1,57 +1,55 @@
-## Оглавление
-- [Описание проекта](#описание-проекта)
-- [Архитектура](#архитектура)
-- [Сценарии выполнения](#сценарии-выполнения)
-  - [Успешный сценарий](#успешный-сценарий)
-  - [Неуспешный сценарий (откат)](#неуспешный-сценарий-откат)
-
-## Описание проекта
-Этот проект демонстрирует реализацию оркестровой саги при помощи Kafka для управления процессом обработки заказа.
-В данной архитектуре OrderService выполняет роль оркестратора и управляет ходом выполнения саги, взаимодействуя с другими сервисами с помощью событий и команд.
+# Event Driven Orders Management System
+## [Read in Russian](README.ru.md)
 
 
+## Table of Contents
+- [Project Description](#project-description)
+- [Architecture](#architecture)
+- [Execution Scenarios](#execution-scenarios)
+  - [Successful Scenario](#successful-scenario)
+  - [Unsuccessful Scenario (Rollback)](#unsuccessful-scenario-rollback)
 
-## Архитектура
-- Order Service: отвечает за управление заказами и выполнение основной логики оркестрации через сагу.
-- Product Service: обрабатывает резервирование товаров для заказов.
-- Payment Service: обрабатывает платежи для заказов.
-- Shipment Service: отвечает за создание и отправку заказов.
+## Project Description
+This project demonstrates the implementation of an orchestration saga using Kafka to manage the order processing flow. In this architecture, the **OrderService** acts as the orchestrator, managing the saga’s execution flow by interacting with other services through events and commands.
 
 
-## Сценарии выполнения
-### Успешный сценарий 
+
+## Architecture
+- **Order Service**: Responsible for managing orders and executing the main orchestration logic through the saga.
+- **Product Service**: Handles the reservation of products for orders.
+- **Payment Service**: Processes payments for orders.
+- **Shipment Service**: Responsible for creating and shipping orders.
+
+
+
+## Execution Scenarios
+
+### Successful Scenario
 ![Blank diagram (1)](https://github.com/user-attachments/assets/6868134b-56a1-481a-af22-6d37e9ef4223)
 
-#### Создание заказа:
-Клиент создает новый заказ в Order Service. Это действие инициирует событие `OrderCreatedEvent`.
+#### Order Creation:
+The customer creates a new order in **Order Service**, which triggers the `OrderCreatedEvent`.
 
-#### Резервирование товара:
-Сага перехватывает `OrderCreatedEvent` и отправляет команду `ReserveProductCommand` в Product Service, который резервирует товар для заказа.
-Если резервирование успешно, Product Service генерирует событие `ProductReservedEvent`.
+#### Product Reservation:
+The saga intercepts the `OrderCreatedEvent` and sends the `ReserveProductCommand` to **Product Service** to reserve the product for the order. If the reservation is successful, **Product Service** generates the `ProductReservedEvent`.
 
-#### Обработка платежа:
-Сага получает `ProductReservedEvent` и отправляет команду `ProcessPaymentCommand` в Payment Service для обработки платежа по заказу.
-Если платеж успешно обработан, Payment Service отправляет событие `PaymentProcessedEvent`.
+#### Payment Processing:
+The saga receives the `ProductReservedEvent` and sends the `ProcessPaymentCommand` to **Payment Service** to process the payment for the order. If the payment is successfully processed, **Payment Service** publishes the `PaymentProcessedEvent`.
 
-#### Создание отправления:
-Получив `PaymentProcessedEvent`, сага отправляет команду `CreateShipmentCommand` в Shipment Service для создания отправления заказа.
-Когда отправление успешно создано, Shipment Service отправляет событие `ShipmentCreatedEvent`.
+#### Shipment Creation:
+Upon receiving the `PaymentProcessedEvent`, the saga sends the `CreateShipmentCommand` to **Shipment Service** to create the shipment for the order. Once the shipment is successfully created, **Shipment Service** generates the `ShipmentCreatedEvent`.
 
-#### Подтверждение заказа:
-Сага получает `ShipmentCreatedEvent` и отправляет команду `ApproveOrderCommand` в Order Service для окончательного подтверждения заказа.
-Order Service завершает процесс, генерируя событие `OrderApprovedEvent`, уведомляющее о том, что заказ успешно обработан.
+#### Order Confirmation:
+The saga receives the `ShipmentCreatedEvent` and sends the `ApproveOrderCommand` to **Order Service** to approve the order. **Order Service** completes the process by generating the `OrderApprovedEvent`, which notifies that the order has been successfully processed.
 
 
-### Неуспешный сценарий (откат)
+### Unsuccessful Scenario (Rollback)
 
-#### Ошибка обработки платежа:
-Если на этапе обработки платежа возникает ошибка (например, отклонение платежа), Payment Service публикует событие `PaymentProcessedFailedEvent`.
+#### Payment Processing Error:
+If an error occurs during payment processing (e.g., payment rejection), **Payment Service** publishes the `PaymentProcessedFailedEvent`.
 
-#### Отмена резервирования товара:
-Сага перехватывает событие `PaymentProcessedFailedEvent` и отправляет команду `CancelProductReservationCommand` в Product Service для отмены ранее зарезервированных товаров. 
-Если отмена проходит успешно, Product Service генерирует событие `ProductReservationCancelledEvent`.
+#### Cancel Product Reservation:
+The saga intercepts the `PaymentProcessedFailedEvent` and sends the `CancelProductReservationCommand` to **Product Service** to cancel the previously reserved products. If the cancellation is successful, **Product Service** generates the `ProductReservationCancelledEvent`.
 
-#### Отклонение заказа:
-Сага перехватывает событие `ProductReservationCancelledEvent` и отправляет команду `RejectOrderCommand` в Order Service для отклонения заказа.
-Когда Order Service получает команду `RejectOrderCommand`, он отклоняет заказ и завершает процесс отката, генерируя событие `OrderRejectedEvent`, уведомляющее о том, что заказ был отклонен.
-
+#### Order Rejection:
+The saga intercepts the `ProductReservationCancelledEvent` and sends the `RejectOrderCommand` to **Order Service** to reject the order. Once **Order Service** receives the `RejectOrderCommand`, it rejects the order and completes the rollback process by generating the `OrderRejectedEvent`, which notifies that the order has been rejected.
