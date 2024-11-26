@@ -8,6 +8,8 @@ import com.ryzendee.productservice.exception.ProductReservationException;
 import com.ryzendee.productservice.repository.ProductRepository;
 import com.ryzendee.productservice.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -18,6 +20,9 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+
+    @Qualifier("productEventsTopic")
+    private final NewTopic productEventsTopic;
 
     @Override
     public ProductResponse createProduct(CreateProductRequest request) {
@@ -40,6 +45,15 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(productToReserve);
 
         return mapToProductResponse(productToReserve);
+    }
+
+    @Override
+    public void cancelReservation(UUID reservedProductId, Integer reservedQuantity) {
+        ProductEntity reservedProduct = getById(reservedProductId);
+
+        Integer restoredQuantity = reservedProduct.getQuantity() + reservedQuantity;
+        reservedProduct.setQuantity(restoredQuantity);
+        productRepository.save(reservedProduct);
     }
 
     private ProductEntity getById(UUID id) {

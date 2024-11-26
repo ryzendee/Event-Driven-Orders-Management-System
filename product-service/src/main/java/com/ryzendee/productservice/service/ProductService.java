@@ -9,4 +9,5 @@ public interface ProductService {
 
     ProductResponse createProduct(CreateProductRequest request);
     ProductResponse reserveProduct(UUID productToReserveId, Integer quantityToReserve);
+    void cancelReservation(UUID reservedProductId, Integer reservedQuantity);
 }
